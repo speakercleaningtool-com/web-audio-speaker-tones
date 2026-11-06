@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Web Audio Speaker Tones: open-source demo</title>
+  <meta name="description" content="A small open-source Web Audio API demo that generates a 165 Hz tone, a frequency sweep and a left/right channel test in the browser." />
+  <style>
+    :root { color-scheme: dark; --bg:#0d1014; --fg:#e8ecf1; --muted:#9aa4b2; --accent:#f5a524; }
+    body { margin:0; font-family:system-ui,sans-serif; background:var(--bg); color:var(--fg); }
+    main { max-width:640px; margin:0 auto; padding:2rem 1.25rem; }
+    h1 { font-size:1.6rem; margin:0 0 .5rem; }
+    p { color:var(--muted); line-height:1.6; }
+    .row { display:flex; flex-wrap:wrap; gap:.6rem; margin:1.25rem 0; }
+    button { font:inherit; padding:.7rem 1rem; border-radius:8px; border:1px solid #2a313b; background:#161b22; color:var(--fg); cursor:pointer; }
+    button.primary { background:var(--accent); color:#111; border-color:var(--accent); font-weight:600; }
+    label { display:block; margin-top:1rem; color:var(--muted); }
+    input[type=range] { width:100%; }
+    #status { font-family:ui-monospace,monospace; color:var(--accent); min-height:1.4em; }
+    a { color:var(--accent); }
+    footer { margin-top:2.5rem; font-size:.9rem; color:var(--muted); }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Web Audio Speaker Tones</h1>
+    <p>A minimal, dependency-free demo of generating test tones with the Web Audio API. Everything runs in your browser. No audio is recorded or uploaded.</p>
+    <p><strong>Safety:</strong> start at a low volume. Do not play tones while wearing earbuds or headphones at high volume. Stop if you hear rattling or distortion.</p>
+
+    <div class="row">
+      <button class="primary" id="tone">Play 165 Hz tone</button>
+      <button id="sweep">Play sweep (100 Hz to 1 kHz)</button>
+      <button id="left">Left channel</button>
+      <button id="right">Right channel</button>
+      <button id="stop">Stop</button>
+    </div>
+
+    <label for="vol">Volume: <span id="volLabel">30%</span></label>
+    <input id="vol" type="range" min="0" max="100" value="30" />
+
+    <p id="status"></p>
+
+    <footer>
+      MIT licensed. Source on GitHub.<br />
+      Full production tool with more tests and guides:
+      <a href="https://speakercleaningtool.com">Speaker Cleaning Tool</a>, by Nayeem.
+    </footer>
+  </main>
+  <script type="module">
+    import { ToneEngine } from "./tone-engine.js";
+
+    let engine = null;
+    const $ = (id) => document.getElementById(id);
+    const status = (t) => ($("status").textContent = t);
+    const vol = () => Number($("vol").value) / 100;
+
+    // AudioContext must be created inside a user gesture (browser autoplay rules).
+    function getEngine() {
+      if (!engine) engine = new ToneEngine();
+      return engine;
+    }
+
+    $("tone").onclick = () => { getEngine().playTone({ frequency: 165, duration: 30, volume: vol() }); status("Playing 165 Hz for 30 s"); };
+    $("sweep").onclick = () => { getEngine().playSweep({ from: 100, to: 1000, duration: 10, volume: vol() }); status("Sweeping 100 Hz to 1 kHz over 10 s"); };
+    $("left").onclick = () => { getEngine().playTone({ frequency: 440, duration: 2, volume: vol(), pan: -1 }); status("440 Hz, left channel"); };
+    $("right").onclick = () => { getEngine().playTone({ frequency: 440, duration: 2, volume: vol(), pan: 1 }); status("440 Hz, right channel"); };
+    $("stop").onclick = () => { engine?.stop(); status("Stopped"); };
+    $("vol").oninput = () => { $("volLabel").textContent = $("vol").value + "%"; engine?.setVolume(vol()); };
+  </script>
+</body>
+</html>
