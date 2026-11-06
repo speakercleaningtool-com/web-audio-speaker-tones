@@ -2,7 +2,7 @@
 
 A small, dependency-free JavaScript module and demo page for generating speaker test tones with the [Web Audio API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API).
 
-**Live demo:** https://Nayeem.github.io/web-audio-speaker-tones/
+**Live demo:** https://nayeem.github.io/web-audio-speaker-tones/
 
 ## Features
 
